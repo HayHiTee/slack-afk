@@ -4,7 +4,7 @@ from app import db
 from app.bots import bot
 from app.bots.models import User
 from app.bots.slash_commands import SlackBots
-from instance.config import VERIFICATION_TOKEN
+from instance.config import  Config
 
 Slack_Bots = SlackBots(User(), db)
 
@@ -14,7 +14,7 @@ def slash():
     data = request.form
     print(data)
     if request.method == "POST":
-        verification_token = VERIFICATION_TOKEN
+        verification_token = Config.VERIFICATION_TOKEN
         print(verification_token)
         print(data['token'])
         if data['token'] == verification_token:

@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app import bots
 from app.bots import bot
+from instance.config import Config
 
 db = SQLAlchemy()
 
@@ -17,7 +18,7 @@ def create_app(test_config=None):
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=False)
+        app.config.from_object(Config)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
