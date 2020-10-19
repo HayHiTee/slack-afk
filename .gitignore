@@ -3,7 +3,6 @@ venv/
 *.pyc
 __pycache__/
 
-instance/
 
 .pytest_cache/
 .coverage
@@ -14,3 +13,4 @@ build/
 *.egg-info/
 .env
 .idea
+test.db
