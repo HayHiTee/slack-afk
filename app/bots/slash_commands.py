@@ -14,6 +14,11 @@ class SlackBots:
         self.user = user
         self.db = db
 
+    def send_to_response_url(self, url, payload):
+        rs = requests.post(url, json=payload, headers=self.get_header())
+        print(rs.status_code)
+        print(rs.content)
+
     def get_access_token(self, code):
         access_token_url = f"{SLACK_BASE_URL}/api/oauth.v2.access"
         payload = {
@@ -51,7 +56,7 @@ class SlackBots:
                                 status_text="Out to Lunch",
                                 expiration_time=int(utc_date.timestamp()),
                                 emoji=":fries:")
-        return {'text': text, "response_type": "in_channel"}
+        return {'text': text, "response_type": "in_channel",  "delete_original": "true",}
 
     def get_errand_message(self, username, hours):
         utc_date = self.add_to_time(hours)

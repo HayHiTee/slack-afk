@@ -15,10 +15,13 @@ def slash():
     print(data)
     if request.method == "POST":
         verification_token = VERIFICATION_TOKEN
+        print(verification_token)
+        print(data['token'])
         if data['token'] == verification_token:
             username = data.get("user_id", "invalid_name")
+            response_url = data.get("response_url")
             data_text = data['text'].split(" ")
-            payload = {}
+            payload = {"text":"Got it"}
             try:
                 hours = Slack_Bots.get_valid_hour(data_text)
             except ValueError:
@@ -26,13 +29,15 @@ def slash():
                 payload = {'text': msg, "response_type": "ephemeral"}
                 return jsonify(payload)
             if 'lunch' in data_text:
-                payload = Slack_Bots.get_lunch_message(username, hours)
+                lunch_payload = Slack_Bots.get_lunch_message(username, hours)
+                Slack_Bots.send_to_response_url(response_url, lunch_payload)
             elif 'errands' in data_text:
-                payload = Slack_Bots.get_errand_message(username, hours)
+                errand_payload = Slack_Bots.get_errand_message(username, hours)
+                Slack_Bots.send_to_response_url(response_url, errand_payload)
             else:
                 msg = 'Invalid command!'
                 payload = {'text': msg, "response_type": "ephemeral"}
-            return jsonify(payload)
+            return jsonify(payload), 200
         else:
             return jsonify({"error": "Not found"})
     elif request.method == "GET":
