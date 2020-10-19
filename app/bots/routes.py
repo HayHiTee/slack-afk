@@ -1,0 +1,51 @@
+from flask import jsonify, request, Blueprint
+
+from app import db
+from app.bots import bot
+from app.bots.models import User
+from app.bots.slash_commands import SlackBots
+from instance.config import VERIFICATION_TOKEN
+
+Slack_Bots = SlackBots(User(), db)
+
+
+@bot.route('/slash', methods=['GET', 'POST'])
+def slash():
+    data = request.form
+    print(data)
+    if request.method == "POST":
+        verification_token = VERIFICATION_TOKEN
+        if data['token'] == verification_token:
+            username = data.get("user_id", "invalid_name")
+            data_text = data['text'].split(" ")
+            payload = {}
+            try:
+                hours = Slack_Bots.get_valid_hour(data_text)
+            except ValueError:
+                msg = "Invalid time"
+                payload = {'text': msg, "response_type": "ephemeral"}
+                return jsonify(payload)
+            if 'lunch' in data_text:
+                payload = Slack_Bots.get_lunch_message(username, hours)
+            elif 'errands' in data_text:
+                payload = Slack_Bots.get_errand_message(username, hours)
+            else:
+                msg = 'Invalid command!'
+                payload = {'text': msg, "response_type": "ephemeral"}
+            return jsonify(payload)
+        else:
+            return jsonify({"error": "Not found"})
+    elif request.method == "GET":
+        return jsonify({"text": "Welcome"})
+
+
+@bot.route('/slash/auth/redirect', methods=['GET'])
+def redirect():
+    code = request.args.get('code')
+    print(code)
+    return Slack_Bots.get_access_token(code)
+
+
+@bot.route('/hello')
+def index():
+    return 'Hello, World!'
