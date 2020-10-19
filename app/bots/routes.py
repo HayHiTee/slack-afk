@@ -4,6 +4,7 @@ from app import db
 from app.bots import bot
 from app.bots.models import User
 from app.bots.slash_commands import SlackBots
+from app.bots.thread import run_thread_fn
 from instance.config import  Config
 
 Slack_Bots = SlackBots(User(), db)
@@ -30,10 +31,13 @@ def slash():
                 return jsonify(payload)
             if 'lunch' in data_text:
                 lunch_payload = Slack_Bots.get_lunch_message(username, hours)
-                Slack_Bots.send_to_response_url(response_url, lunch_payload)
+                # Slack_Bots.send_to_response_url(response_url, lunch_payload)
+                # Run in separate thread
+                run_thread_fn(Slack_Bots.send_to_response_url, url=response_url, payload=lunch_payload)
             elif 'errands' in data_text:
                 errand_payload = Slack_Bots.get_errand_message(username, hours)
-                Slack_Bots.send_to_response_url(response_url, errand_payload)
+                # Slack_Bots.send_to_response_url(response_url, errand_payload)
+                run_thread_fn(Slack_Bots.send_to_response_url, url=response_url, payload=errand_payload)
             else:
                 msg = 'Invalid command!'
                 payload = {'text': msg, "response_type": "ephemeral"}
