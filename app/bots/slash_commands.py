@@ -6,7 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import redirect
 
 from app.bots.models import User
-from instance.config import SLACK_BASE_URL, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET
+from instance.config import Config
+# from instance.config import SLACK_BASE_URL, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET
 
 
 class SlackBots:
@@ -20,11 +21,11 @@ class SlackBots:
         print(rs.content)
 
     def get_access_token(self, code):
-        access_token_url = f"{SLACK_BASE_URL}/api/oauth.v2.access"
+        access_token_url = f"{Config.SLACK_BASE_URL}/api/oauth.v2.access"
         payload = {
             "code": code,
-            "client_id": SLACK_CLIENT_ID,
-            "client_secret": SLACK_CLIENT_SECRET,
+            "client_id": Config.SLACK_CLIENT_ID,
+            "client_secret": Config.SLACK_CLIENT_SECRET,
             "redirect_uri": ""
         }
         print(payload)
@@ -82,7 +83,7 @@ class SlackBots:
         return slack_time  # return time in AM and PM
 
     def update_user_status(self, user_id, status_text, expiration_time, emoji, ):
-        slack_base_url = SLACK_BASE_URL
+        slack_base_url = Config.SLACK_BASE_URL
         status_url = f"{slack_base_url}/api/users.profile.set"
         print(status_url)
         payload = {
