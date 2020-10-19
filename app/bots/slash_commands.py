@@ -6,7 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import redirect
 
 from app.bots.models import User
+from app.bots.thread import run_thread_fn
 from instance.config import Config
+
+
 # from instance.config import SLACK_BASE_URL, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET
 
 
@@ -53,20 +56,30 @@ class SlackBots:
         utc_date = self.add_to_time(hours)
         current_time = self.parse_to_slack_time(utc_date)
         text = f'<@{username}> is out to lunch till {current_time}'
-        self.update_user_status(user_id=username,
-                                status_text="Out to Lunch",
-                                expiration_time=int(utc_date.timestamp()),
-                                emoji=":fries:")
-        return {'text': text, "response_type": "in_channel",  "delete_original": "true",}
+        # self.update_user_status(user_id=username,
+        #                         status_text="Out to Lunch",
+        #                         expiration_time=int(utc_date.timestamp()),
+        #                         emoji=":fries:")
+        # Run in separate thread
+        run_thread_fn(self.update_user_status, user_id=username,
+                      status_text="Out to Lunch",
+                      expiration_time=int(utc_date.timestamp()),
+                      emoji=":fries:")
+        return {'text': text, "response_type": "in_channel", "delete_original": "true", }
 
     def get_errand_message(self, username, hours):
         utc_date = self.add_to_time(hours)
         current_time = self.parse_to_slack_time(utc_date)
         text = f'<@{username}> is out on errands till {current_time}'
-        self.update_user_status(user_id=username,
-                                status_text="Out on errand",
-                                expiration_time=int(utc_date.timestamp()),
-                                emoji=":mountain_railway:")
+        # self.update_user_status(user_id=username,
+        #                         status_text="Out on errand",
+        #                         expiration_time=int(utc_date.timestamp()),
+        #                         emoji=":mountain_railway:")
+        # Run in separate thread
+        run_thread_fn(self.update_user_status, user_id=username,
+                      status_text="Out on errand",
+                      expiration_time=int(utc_date.timestamp()),
+                      emoji=":mountain_railway:")
         return {'text': text, "response_type": "in_channel"}
 
     @staticmethod
@@ -95,11 +108,10 @@ class SlackBots:
         }
         user = self.get_user_by_auth_user_id(user_id)
         if user:
+            print(payload)
             rs = requests.post(status_url, json=payload, headers=self.get_header(user.access_token))
             print(rs.status_code)
-            print(rs.content)
-
-        pass
+            print(rs.text)
 
     @staticmethod
     def get_header(token=""):

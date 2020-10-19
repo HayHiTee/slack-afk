@@ -1,5 +1,6 @@
 import os
 
+
 class Config:
     VERIFICATION_TOKEN = os.environ.get('VERIFICATION_TOKEN', "ok")
     SECRET_KEY = 'dev'
