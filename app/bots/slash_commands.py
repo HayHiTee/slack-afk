@@ -5,6 +5,7 @@ import requests
 from flask_sqlalchemy import SQLAlchemy
 from flask import redirect
 
+import app
 from app.bots.models import User
 from app.bots.thread import run_thread_fn
 from instance.config import Config
@@ -128,13 +129,15 @@ class SlackBots:
         self.user.team_id = data.get("team").get("id")
         self.user.team_name = data.get("team").get("name")
 
-        # Check if user already exist
-        if not user:
-            self.db.session.add(self.user)
-        self.db.session.commit()
+        with app.create_app().app_context():
+            # Check if user already exist
+            if not user:
+                self.db.session.add(self.user)
+            self.db.session.commit()
 
     def get_user_by_auth_user_id(self, auth_user_id):
-        user = self.user.query.filter_by(auth_user_id=auth_user_id).first()
+        with app.create_app().app_context():
+            user = self.user.query.filter_by(auth_user_id=auth_user_id).first()
         if user:
             print("access_token", user.access_token)
         return user
