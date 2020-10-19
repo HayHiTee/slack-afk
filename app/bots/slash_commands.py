@@ -134,10 +134,13 @@ class SlackBots:
             if not user:
                 self.db.session.add(self.user)
             self.db.session.commit()
+            self.db.close_all_sessions()
+
 
     def get_user_by_auth_user_id(self, auth_user_id):
         with app.create_app().app_context():
             user = self.user.query.filter_by(auth_user_id=auth_user_id).first()
         if user:
             print("access_token", user.access_token)
+        self.db.close_all_sessions()
         return user
